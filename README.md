@@ -1,6 +1,15 @@
 # SCPortfolio
 Get rid of updating your resume and portfolio!
 
+![image](https://raw.githubusercontent.com/SergioChan/SCPortfolio/master/Images/icon.png)
+
+## What does it look like
+![image](https://raw.githubusercontent.com/SergioChan/SCPortfolio/master/Images/IMG_0541.PNG)
+![image](https://raw.githubusercontent.com/SergioChan/SCPortfolio/master/Images/IMG_0542.PNG)
+## Features that I implement
+* 引入了FontAwesome字体来使用其中的图标
+* 自定义了一套类似HTML标记语言的简单标记语言来实现富文本，可以理解为Coretext的简化版本，由AttributedText实现，图片可能会比较困难一些，但是基本的文本样式都可以做到自定义，自定义标签什么的，虽然还没做这么完善，不过你也可以在源码中看到定义的规则，待处理的文本和最后的效果。
+
 ## About this Portfolio
 整理的时候发现电脑里存着各种版本的简历。忽然让我觉得很蛋疼，一次又一次的维护自己唯一能让他人了解自己的文字，每一次都要在散乱的文件中寻找，为什么不能让别人看到更好的自己。我并没有在博客中维护我的作品集，虽然现在自己工作之余写的项目也渐渐多了起来，但是我还是把博客当成了一个纯粹的写一些文字的地方。也许有一天我也会心血来潮在博客中加入作品集什么的。
 
