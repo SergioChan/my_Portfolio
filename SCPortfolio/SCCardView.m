@@ -8,6 +8,7 @@
 
 #import "SCCardView.h"
 #import "NSString+FontAwesome.h"
+#import "UITextView+RCT.h"
 
 @implementation SCCardView
 
@@ -37,6 +38,7 @@
         contentView.editable = NO;
         contentView.text = [contentDict objectForKey:@"content"];
         contentView.textColor = [UIColor darkGrayColor];
+        [contentView rct_attributed];
         [self addSubview:contentView];
         
         if([[contentDict objectForKey:@"title"] isEqualToString:@"More"])

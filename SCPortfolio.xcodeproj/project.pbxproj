@@ -17,6 +17,8 @@
 		2225FE821B992FFA00B372E0 /* UPCardsCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2225FE811B992FFA00B372E0 /* UPCardsCarousel.m */; };
 		2225FE841B99307200B372E0 /* content.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2225FE831B99307200B372E0 /* content.plist */; };
 		2225FE881B99312800B372E0 /* SCCardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2225FE871B99312800B372E0 /* SCCardView.m */; };
+		22B981BE1B9991B200B5C676 /* UILabel+RCT.m in Sources */ = {isa = PBXBuildFile; fileRef = 22B981BD1B9991B200B5C676 /* UILabel+RCT.m */; };
+		22B981C11B99AED100B5C676 /* UITextView+RCT.m in Sources */ = {isa = PBXBuildFile; fileRef = 22B981C01B99AED100B5C676 /* UITextView+RCT.m */; };
 		22D557511B9978FA00F869F3 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 22D557501B9978FA00F869F3 /* FontAwesome.ttf */; };
 		22D557541B9979DD00F869F3 /* NSString+FontAwesome.m in Sources */ = {isa = PBXBuildFile; fileRef = 22D557531B9979DD00F869F3 /* NSString+FontAwesome.m */; };
 /* End PBXBuildFile section */
@@ -50,6 +52,10 @@
 		2225FE831B99307200B372E0 /* content.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = content.plist; sourceTree = "<group>"; };
 		2225FE861B99312800B372E0 /* SCCardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCCardView.h; sourceTree = "<group>"; };
 		2225FE871B99312800B372E0 /* SCCardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCCardView.m; sourceTree = "<group>"; };
+		22B981BC1B9991B200B5C676 /* UILabel+RCT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UILabel+RCT.h"; sourceTree = "<group>"; };
+		22B981BD1B9991B200B5C676 /* UILabel+RCT.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UILabel+RCT.m"; sourceTree = "<group>"; };
+		22B981BF1B99AED100B5C676 /* UITextView+RCT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UITextView+RCT.h"; sourceTree = "<group>"; };
+		22B981C01B99AED100B5C676 /* UITextView+RCT.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UITextView+RCT.m"; sourceTree = "<group>"; };
 		22D557501B9978FA00F869F3 /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome.ttf; sourceTree = "<group>"; };
 		22D557521B9979DD00F869F3 /* NSString+FontAwesome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+FontAwesome.h"; sourceTree = "<group>"; };
 		22D557531B9979DD00F869F3 /* NSString+FontAwesome.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+FontAwesome.m"; sourceTree = "<group>"; };
@@ -160,6 +166,10 @@
 			children = (
 				22D557521B9979DD00F869F3 /* NSString+FontAwesome.h */,
 				22D557531B9979DD00F869F3 /* NSString+FontAwesome.m */,
+				22B981BC1B9991B200B5C676 /* UILabel+RCT.h */,
+				22B981BD1B9991B200B5C676 /* UILabel+RCT.m */,
+				22B981BF1B99AED100B5C676 /* UITextView+RCT.h */,
+				22B981C01B99AED100B5C676 /* UITextView+RCT.m */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -267,9 +277,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				2225FE821B992FFA00B372E0 /* UPCardsCarousel.m in Sources */,
+				22B981BE1B9991B200B5C676 /* UILabel+RCT.m in Sources */,
 				2225FE621B992F9E00B372E0 /* ViewController.m in Sources */,
 				22D557541B9979DD00F869F3 /* NSString+FontAwesome.m in Sources */,
 				2225FE881B99312800B372E0 /* SCCardView.m in Sources */,
+				22B981C11B99AED100B5C676 /* UITextView+RCT.m in Sources */,
 				2225FE5F1B992F9E00B372E0 /* AppDelegate.m in Sources */,
 				2225FE5C1B992F9D00B372E0 /* main.m in Sources */,
 			);
