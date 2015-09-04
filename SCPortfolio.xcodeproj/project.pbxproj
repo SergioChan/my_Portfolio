@@ -15,6 +15,8 @@
 		2225FE6A1B992F9E00B372E0 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2225FE681B992F9E00B372E0 /* LaunchScreen.xib */; };
 		2225FE761B992F9E00B372E0 /* SCPortfolioTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2225FE751B992F9E00B372E0 /* SCPortfolioTests.m */; };
 		2225FE821B992FFA00B372E0 /* UPCardsCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2225FE811B992FFA00B372E0 /* UPCardsCarousel.m */; };
+		2225FE841B99307200B372E0 /* content.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2225FE831B99307200B372E0 /* content.plist */; };
+		2225FE881B99312800B372E0 /* SCCardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2225FE871B99312800B372E0 /* SCCardView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +45,9 @@
 		2225FE751B992F9E00B372E0 /* SCPortfolioTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCPortfolioTests.m; sourceTree = "<group>"; };
 		2225FE801B992FFA00B372E0 /* UPCardsCarousel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UPCardsCarousel.h; sourceTree = "<group>"; };
 		2225FE811B992FFA00B372E0 /* UPCardsCarousel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UPCardsCarousel.m; sourceTree = "<group>"; };
+		2225FE831B99307200B372E0 /* content.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = content.plist; sourceTree = "<group>"; };
+		2225FE861B99312800B372E0 /* SCCardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCCardView.h; sourceTree = "<group>"; };
+		2225FE871B99312800B372E0 /* SCCardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCCardView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +89,7 @@
 		2225FE581B992F9D00B372E0 /* SCPortfolio */ = {
 			isa = PBXGroup;
 			children = (
+				2225FE851B99310E00B372E0 /* Views */,
 				2225FE7F1B992FFA00B372E0 /* UPCardsCarousel */,
 				2225FE5D1B992F9E00B372E0 /* AppDelegate.h */,
 				2225FE5E1B992F9E00B372E0 /* AppDelegate.m */,
@@ -100,6 +106,7 @@
 		2225FE591B992F9D00B372E0 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				2225FE831B99307200B372E0 /* content.plist */,
 				2225FE5A1B992F9D00B372E0 /* Info.plist */,
 				2225FE5B1B992F9D00B372E0 /* main.m */,
 			);
@@ -130,6 +137,15 @@
 				2225FE811B992FFA00B372E0 /* UPCardsCarousel.m */,
 			);
 			path = UPCardsCarousel;
+			sourceTree = "<group>";
+		};
+		2225FE851B99310E00B372E0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2225FE861B99312800B372E0 /* SCCardView.h */,
+				2225FE871B99312800B372E0 /* SCCardView.m */,
+			);
+			name = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,6 +230,7 @@
 			files = (
 				2225FE651B992F9E00B372E0 /* Main.storyboard in Resources */,
 				2225FE6A1B992F9E00B372E0 /* LaunchScreen.xib in Resources */,
+				2225FE841B99307200B372E0 /* content.plist in Resources */,
 				2225FE671B992F9E00B372E0 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -234,6 +251,7 @@
 			files = (
 				2225FE821B992FFA00B372E0 /* UPCardsCarousel.m in Sources */,
 				2225FE621B992F9E00B372E0 /* ViewController.m in Sources */,
+				2225FE881B99312800B372E0 /* SCCardView.m in Sources */,
 				2225FE5F1B992F9E00B372E0 /* AppDelegate.m in Sources */,
 				2225FE5C1B992F9D00B372E0 /* main.m in Sources */,
 			);

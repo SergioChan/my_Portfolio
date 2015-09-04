@@ -7,8 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "UPCardsCarousel.h"
+#import "SCCardView.h"
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <UPCardsCarouselDataSource, UPCardsCarouselDelegate>
 
 
 @end
