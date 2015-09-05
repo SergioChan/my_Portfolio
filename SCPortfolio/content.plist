@@ -55,9 +55,37 @@
 		<key>title</key>
 		<string></string>
 	</dict>
+    <dict>
+        <key>content</key>
+        <string>[i/]Ambler[/i]
+            
+这是一个模仿QQ音乐撸的音乐播放器，本来想做气势音乐(Epic Music)分享的，后来不了了之，也没放在Github上。
+        </string>
+        <key>title</key>
+        <string>Ambler</string>
+    </dict>
+    <dict>
+        <key>content</key>
+        <string>[i/]SelfAgile[/i]
+            
+这是一个我希望用敏捷方法来管理自我学习和日程的东西，因为Trello都拿来团队管理了，自己用不太习惯，所以自己做了一个。在Github上开源着。
+        </string>
+        <key>title</key>
+        <string>SelfAgile</string>
+    </dict>
+    <dict>
+        <key>content</key>
+        <string>[i/]PasswordTerminator[/i]
+            
+这是一个密码随机生成和管理的箱子。起源是某些蛋疼的网站明文传输登录密码，周围的朋友遭盗，于是我做了一个小App，代码完全开源，所以可以保证没有任何后门。这个还在完善细节，会准备上架。
+        </string>
+        <key>title</key>
+        <string>PasswordTerminator</string>
+    </dict>
 	<dict>
 		<key>content</key>
-		<string>项目和经历什么的我不多说了，我的Github仓库和Linkedin主页都有足够的信息让你了解更多的我了。</string>
+		<string>其他的项目和经历什么的我不多说了，我的Github仓库和Linkedin主页都有足够的信息让你了解更多的我了。
+        </string>
 		<key>title</key>
 		<string>More</string>
 	</dict>

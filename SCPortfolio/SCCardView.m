@@ -26,7 +26,7 @@
         [self.layer setBorderWidth:10.0f];
         [self.layer setCornerRadius:4.0f];
         
-        UILabel *labelView = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 260.0f, 20.0f)];
+        UILabel *labelView = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 260.0f, 23.0f)];
         [labelView setFont:[UIFont boldSystemFontOfSize:20.0f]];
         [labelView setTextAlignment:NSTextAlignmentLeft];
         [labelView setTextColor:[UIColor blackColor]];
@@ -38,6 +38,7 @@
         contentView.editable = NO;
         contentView.text = [contentDict objectForKey:@"content"];
         contentView.textColor = [UIColor darkGrayColor];
+        contentView.scrollEnabled = NO;
         [contentView rct_attributed];
         [self addSubview:contentView];
         
