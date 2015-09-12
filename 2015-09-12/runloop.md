@@ -1,4 +1,4 @@
-先来说一个很简单的实例
+##先来说一个很简单的实例
 在scrollView中添加一个timer来刷新视图的时候，如果只是简单的声明
 ```Objective-Cself.timer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(timeUpdate:) userInfo:nil repeats:YES];```
 那么当你滑动或者保持你的手指在scrollView上的时候，timer是不会被响应的，这不是因为刷新视图的操作被占用，而是因为当你没有显式声明的时候，你所定义的timer默认都是加在主线程上，并且，当你在对scrollView进行操作的时候，你的timer的事件根本不会被响应到，这就得说到runloop了。而runloop也是底层原理中相当重要的一部分。我们先从它说起。##什么是runloop
@@ -44,12 +44,12 @@ entries =>
 
 可以看到一个runloop对象包含各种Mode——currentMode，common mode，modes等等，这里的示例我只指定了一个defaultMode。每个mode对应了source，observers和timers，底下的currently则显示的是当前状态的优先级，这个优先级实际上是一个带符号的整型数，后面的观察器部分我会提到。
 
-也许你会注意到 source 包括了source0和source1两个版本。
+> 也许你会注意到 source 包括了source0和source1两个版本。
+> 
+> * Source0 只包含了一个回调（函数指针），它并不能主动触发事件。使用时，你需要先调用 CFRunLoopSourceSignal(source)，将这个 Source 标记为待处理，然后手动调用 CFRunLoopWakeUp(runloop) 来唤醒 RunLoop，让其处理这个事件。
+> * Source1 包含了一个 mach_port 和一个回调（函数指针），被用于通过内核和其他线程相互发送消息。这种 Source 能主动唤醒 RunLoop 的线程。
 
-* Source0 只包含了一个回调（函数指针），它并不能主动触发事件。使用时，你需要先调用 CFRunLoopSourceSignal(source)，将这个 Source 标记为待处理，然后手动调用 CFRunLoopWakeUp(runloop) 来唤醒 RunLoop，让其处理这个事件。
-* Source1 包含了一个 mach_port 和一个回调（函数指针），被用于通过内核和其他线程相互发送消息。这种 Source 能主动唤醒 RunLoop 的线程。
-
-observer是观察者。每个观察者都包含了一个回调，当runloop的状态发生变化时，你可以通过回调来知道当前的状态。CFRunloopActivity是一个枚举，它的值有这些：
+observer是观察者。每个观察者都包含了一个回调，当runloop的状态发生变化时，你可以通过回调来知道当前的状态。CFRunloopActivity是一个枚举，它的值有这些情况，也就意味着我们可以观察到这些状态的变化：
 
 ```Objective-C
 typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
@@ -64,6 +64,15 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 ##Mode
 
 ![image](https://developer.apple.com/library/prerelease/ios/documentation/Cocoa/Conceptual/Multithreading/Art/runloop.jpg)在你的程序中，runloop的过程实际上是一个无限循环的循环体，这个循环体是由你的程序来运行的。主线程的runloop由于系统已经实现并且没有它程序就不能运行，因此不需要我们手动去运行这个runloop。然而如果我们需要在自定义的线程中使用到runloop，我们则需要用一个do...while循环来驱动它。而runloop对象负责不断地在循环体中运行传进来的事件，然后将事件发给相应的响应。
+
+> 如果你打开你的程序的main.m，你就会发现其实主线程的runloop就是在main函数中进行的，并且系统已经为你生成好了autoreleasepool，因此你也无需操心主线程上的内存释放到底是在什么时候执行了：
+> ```Objective-C
+> int main(int argc, char * argv[]) {
+>      @autoreleasepool {
+>         return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+>     }
+> }
+> ```
 根据响应源的不同，runloop也被分成了许多种不同的模式，这就是被Cocoa和Core Foundation都封装了的runloopMode。主要是这么几种：
 * NSDefaultRunLoopMode: 大多数工作中默认的运行方式。* NSConnectionReplyMode: 使用这个Mode去监听NSConnection对象的状态。* NSModalPanelRunLoopMode: 使用这个Mode在Model Panel情况下去区分事件(OS X开发中会遇到)。* NSEventTrackingRunLoopMode: 使用这个Mode去跟踪来自用户交互的事件（比如UITableView上下滑动）。* NSRunLoopCommonModes: 这是一个伪模式，其为一组run loop mode的集合。如果将Input source加入此模式，意味着关联Input source到Common Modes中包含的所有模式下。在iOS系统中NSRunLoopCommonMode包含NSDefaultRunLoopMode、NSTaskDeathCheckMode、NSEventTrackingRunLoopMode.可使用CFRunLoopAddCommonMode方法向Common Modes中添加自定义mode。
 在文首的情况中，我们可以根据苹果官方文档的定义知道，当你在滑动页面的时候，主线程的runloop自动进入了NSEventTrackingRunLoopMode，而你的timer只是运行在DefaultMode下，所以不能响应。那么最简单的办法就是将你的timer添加在其他的mode下，像这样即可：
