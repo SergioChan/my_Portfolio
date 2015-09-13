@@ -49,7 +49,7 @@ entries =>
 > * Source0 只包含了一个回调（函数指针），它并不能主动触发事件。使用时，你需要先调用 CFRunLoopSourceSignal(source)，将这个 Source 标记为待处理，然后手动调用 CFRunLoopWakeUp(runloop) 来唤醒 RunLoop，让其处理这个事件。
 > * Source1 包含了一个 mach_port 和一个回调（函数指针），被用于通过内核和其他线程相互发送消息。这种 Source 能主动唤醒 RunLoop 的线程。
 
-observer是观察者。每个观察者都包含了一个回调，当runloop的状态发生变化时，你可以通过回调来知道当前的状态。CFRunloopActivity是一个枚举，它的值有这些情况，也就意味着我们可以观察到这些状态的变化：
+CFRunLoopObserver类型的对象也可以称之为观察者。每个观察者都包含了一个回调，当runloop的状态发生变化时，你可以通过回调来知道当前的状态。CFRunloopActivity是一个枚举，它的值有这些情况，也就意味着我们可以观察到这些状态的变化：
 
 ```Objective-C
 typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
@@ -74,9 +74,25 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 > }
 > ```
 根据响应源的不同，runloop也被分成了许多种不同的模式，这就是被Cocoa和Core Foundation都封装了的runloopMode。主要是这么几种：
-* NSDefaultRunLoopMode: 大多数工作中默认的运行方式。* NSConnectionReplyMode: 使用这个Mode去监听NSConnection对象的状态。* NSModalPanelRunLoopMode: 使用这个Mode在Model Panel情况下去区分事件(OS X开发中会遇到)。* NSEventTrackingRunLoopMode: 使用这个Mode去跟踪来自用户交互的事件（比如UITableView上下滑动）。* NSRunLoopCommonModes: 这是一个伪模式，其为一组run loop mode的集合。如果将Input source加入此模式，意味着关联Input source到Common Modes中包含的所有模式下。在iOS系统中NSRunLoopCommonMode包含NSDefaultRunLoopMode、NSTaskDeathCheckMode、NSEventTrackingRunLoopMode.可使用CFRunLoopAddCommonMode方法向Common Modes中添加自定义mode。
+* NSDefaultRunLoopMode: 大多数工作中默认的运行方式。* NSConnectionReplyMode: 使用这个Mode去监听NSConnection对象的状态。* NSModalPanelRunLoopMode: 使用这个Mode在Model Panel情况下去区分事件(OS X开发中会遇到)。* NSEventTrackingRunLoopMode: 使用这个Mode去跟踪来自用户交互的事件（比如UITableView上下滑动）。* NSRunLoopCommonModes: 这是一个伪模式，其为一组run loop mode的集合。如果将Input source加入此模式，意味着关联Input source到Common Modes中包含的所有模式下。在iOS系统中NSRunLoopCommonMode包含NSDefaultRunLoopMode、NSTaskDeathCheckMode、NSEventTrackingRunLoopMode.可使用CFRunLoopAddCommonMode方法向Common Modes中添加自定义mode。
 在文首的情况中，我们可以根据苹果官方文档的定义知道，当你在滑动页面的时候，主线程的runloop自动进入了NSEventTrackingRunLoopMode，而你的timer只是运行在DefaultMode下，所以不能响应。那么最简单的办法就是将你的timer添加在其他的mode下，像这样即可：
 ```Objective-C[[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];```
-需要注意的是CommonModes其实并不是一种Mode，而是一个集合。因此runloop并不能在CommonModes下运行，相反，你可以将需要输入的事件源添加为这个mode，这样无论runloop运行在哪个mode下都可以响应这个输入事件，否则这个事件将不会得到响应。##输入源
+需要注意的是CommonModes其实并不是一种Mode，而是一个集合。因此runloop并不能在CommonModes下运行，相反，你可以将需要输入的事件源添加为这个mode，这样无论runloop运行在哪个mode下都可以响应这个输入事件，否则这个事件将不会得到响应。##Input Source
     输入源包括三种，端口，自定义输入源和performSelector的消息。根据上面的图我们可以看出，在runloop接收到消息并执行了指定方法的时候，它会执行runUntilDate:这个方法来退出当前循环。
-端口源是基于Mach port的
+端口源是基于Mach port的，其他进程或线程可以通过端口来发送消息。这里的知识点需要深入到Mach，就已经比较晦涩难懂了……这里你只需要知道你可以用Cocoa封装的NSPort对象来进行线程之间的通信，而这种通信方式所产生的事件就是通过端口源来传入runloop的。自定义输入源。Core Foundation提供了CFRunLoopSourceRef类型的相关函数，可以用来创建自定义输入源。
+```Objective-C
+//在主线程的Run Loop下执行指定的 @selector 方法
+performSelectorOnMainThread:withObject:waitUntilDone:
+performSelectorOnMainThread:withObject:waitUntilDone:modes:
+
+//在当前线程的Run Loop下执行指定的 @selector 方法
+performSelector:onThread:withObject:waitUntilDone:
+performSelector:onThread:withObject:waitUntilDone:modes:
+
+//在当前线程的Run Loop下延迟加载指定的 @selector 方法
+performSelector:withObject:afterDelay:
+performSelector:withObject:afterDelay:inModes:
+
+//取消当前线程的调用
+cancelPreviousPerformRequestsWithTarget:
+cancelPreviousPerformRequestsWithTarget:selector:object:```
