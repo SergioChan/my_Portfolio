@@ -148,7 +148,47 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeTimers
 2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeSources
 2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeWaiting```
-> 在这里我连续调用了两次performSelector，可以看到runloop也经历了两个循环，而如果只调用一次的话，不会有多出来的那次runloop（你可以自己尝试一下），这是否说明每一次performSelector执行完毕之后都会立即结束当前runloop开始新的，苹果的官方文档里有一句话：
-> > > > The run loop processes all queued perform selector calls each time through the loop, rather than processing one during each loop iteration
-> > 应该意思是并不是像上面看到的结果那样每一次循环执行一次。
-
+在这里我连续调用了两次performSelector，可以看到runloop也经历了两个循环，而如果只调用一次的话，不会有多出来的那次runloop（你可以自己尝试一下），这是否说明每一次performSelector执行完毕之后都会立即结束当前runloop开始新的，苹果的官方文档里有一句话：
+> The run loop processes all queued perform selector calls each time through the loop, rather than processing one during each loop iteration
+应该意思是并不是像上面看到的结果那样每一次循环执行一次，而是有一个待执行的操作队列。如果我同时执行四次performSelector，像这样：
+```Objective-C
+[self performSelector:@selector(selectorTest) onThread:self.runLoopThread withObject:nil waitUntilDone:NO];
+    [self performSelector:@selector(selectorTest_1) onThread:self.runLoopThread withObject:nil waitUntilDone:NO];
+    [self performSelector:@selector(selectorTest_2) onThread:self.runLoopThread withObject:nil waitUntilDone:NO];
+    [self performSelector:@selector(selectorTest_2) onThread:self.runLoopThread withObject:nil waitUntilDone:NO];
+```
+实际上得到的结果和上面是一样的，然而当我将他们的waitUntilDone参数都设置为YES之后，我们可以看到不一样的地方：
+
+```
+2015-09-15 21:30:02.144 runloopTest[89070:1961439] Thread Enter
+2015-09-15 21:30:03.463 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
+2015-09-15 21:30:03.463 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] fuck
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] fuck_1
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] fuck_2
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] fuck_2
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
+2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 21:30:03.466 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 21:30:03.466 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeWaiting
+```
+
+你可以看到每一个performSelector操作都单独执行了一个runloop，从苹果的文档中我们可以找到这个方法的定义：
+
+> * performSelector:onThread:withObject:waitUntilDone:> * performSelector:onThread:withObject:waitUntilDone:modes:
+> > Performs the specified selector on any thread for which you have an NSThread object. These methods give you the option of blocking the current thread until the selector is performed.
+也就是说，waitUntilDone意味着这个操作是否
