@@ -49,18 +49,7 @@ entries =>
 > * Source0 只包含了一个回调（函数指针），它并不能主动触发事件。使用时，你需要先调用 CFRunLoopSourceSignal(source)，将这个 Source 标记为待处理，然后手动调用 CFRunLoopWakeUp(runloop) 来唤醒 RunLoop，让其处理这个事件。
 > * Source1 包含了一个 mach_port 和一个回调（函数指针），被用于通过内核和其他线程相互发送消息。这种 Source 能主动唤醒 RunLoop 的线程。
 
-CFRunLoopObserver类型的对象也可以称之为观察者。每个观察者都包含了一个回调，当runloop的状态发生变化时，你可以通过回调来知道当前的状态。CFRunloopActivity是一个枚举，它的值有这些情况，也就意味着我们可以观察到这些状态的变化：
-
-```Objective-C
-typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
-    kCFRunLoopEntry         = (1UL << 0), // 即将进入Loop
-    kCFRunLoopBeforeTimers  = (1UL << 1), // 即将处理 Timer
-    kCFRunLoopBeforeSources = (1UL << 2), // 即将处理 Source
-    kCFRunLoopBeforeWaiting = (1UL << 5), // 即将进入休眠
-    kCFRunLoopAfterWaiting  = (1UL << 6), // 刚从休眠中唤醒
-    kCFRunLoopExit          = (1UL << 7), // 即将退出Loop
-};
-```
+CFRunLoopObserver类型的对象也可以称之为观察者。每个观察者都包含了一个回调，当runloop的状态发生变化时，你可以通过回调来知道当前的状态。
 ##Mode
 
 ![image](https://developer.apple.com/library/prerelease/ios/documentation/Cocoa/Conceptual/Multithreading/Art/runloop.jpg)在你的程序中，runloop的过程实际上是一个无限循环的循环体，这个循环体是由你的程序来运行的。主线程的runloop由于系统已经实现并且没有它程序就不能运行，因此不需要我们手动去运行这个runloop。然而如果我们需要在自定义的线程中使用到runloop，我们则需要用一个do...while循环来驱动它。而runloop对象负责不断地在循环体中运行传进来的事件，然后将事件发给相应的响应。
@@ -79,8 +68,8 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 ```Objective-C[[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];```
 需要注意的是CommonModes其实并不是一种Mode，而是一个集合。因此runloop并不能在CommonModes下运行，相反，你可以将需要输入的事件源添加为这个mode，这样无论runloop运行在哪个mode下都可以响应这个输入事件，否则这个事件将不会得到响应。##Input Source
     输入源包括三种，端口，自定义输入源和performSelector的消息。根据上面的图我们可以看出，在runloop接收到消息并执行了指定方法的时候，它会执行runUntilDate:这个方法来退出当前循环。
-端口源是基于Mach port的，其他进程或线程可以通过端口来发送消息。这里的知识点需要深入到Mach，就已经比较晦涩难懂了……这里你只需要知道你可以用Cocoa封装的NSPort对象来进行线程之间的通信，而这种通信方式所产生的事件就是通过端口源来传入runloop的。自定义输入源。Core Foundation提供了CFRunLoopSourceRef类型的相关函数，可以用来创建自定义输入源。
-performSelector输入源。
+端口源是基于Mach port的，其他进程或线程可以通过端口来发送消息。这里的知识点需要深入到Mach，就已经比较晦涩难懂了……这里你只需要知道你可以用Cocoa封装的NSPort对象来进行线程之间的通信，而这种通信方式所产生的事件就是通过端口源来传入runloop的。关于Mach port的更深层介绍可以看[这篇](http://segmentfault.com/a/1190000002400329)。自定义输入源。Core Foundation提供了CFRunLoopSourceRef类型的相关函数，可以用来创建自定义输入源。
+performSelector输入源:
 ```Objective-C
 //在主线程的Run Loop下执行指定的 @selector 方法
 performSelectorOnMainThread:withObject:waitUntilDone:
