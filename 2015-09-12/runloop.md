@@ -80,6 +80,7 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 需要注意的是CommonModes其实并不是一种Mode，而是一个集合。因此runloop并不能在CommonModes下运行，相反，你可以将需要输入的事件源添加为这个mode，这样无论runloop运行在哪个mode下都可以响应这个输入事件，否则这个事件将不会得到响应。##Input Source
     输入源包括三种，端口，自定义输入源和performSelector的消息。根据上面的图我们可以看出，在runloop接收到消息并执行了指定方法的时候，它会执行runUntilDate:这个方法来退出当前循环。
 端口源是基于Mach port的，其他进程或线程可以通过端口来发送消息。这里的知识点需要深入到Mach，就已经比较晦涩难懂了……这里你只需要知道你可以用Cocoa封装的NSPort对象来进行线程之间的通信，而这种通信方式所产生的事件就是通过端口源来传入runloop的。自定义输入源。Core Foundation提供了CFRunLoopSourceRef类型的相关函数，可以用来创建自定义输入源。
+performSelector输入源。
 ```Objective-C
 //在主线程的Run Loop下执行指定的 @selector 方法
 performSelectorOnMainThread:withObject:waitUntilDone:
@@ -96,3 +97,69 @@ performSelector:withObject:afterDelay:inModes:
 //取消当前线程的调用
 cancelPreviousPerformRequestsWithTarget:
 cancelPreviousPerformRequestsWithTarget:selector:object:```
+## runloop生命周期
+每一次runloop其实都是一次循环，runloop会在循环中执行runUntilDate: 或者runMode: beforeDate: 来开始每一个循环。而每一个循环又分为下面几个阶段，也就是runloop的生命周期：
+* kCFRunLoopEntry 进入循环* kCFRunLoopBeforeTimers 先接收timer的事件* kCFRunLoopBeforeSources 接收来自input source的事件* kCFRunLoopBeforeWaiting 如果没有事件，则准备进入休眠模式，在这里，如果没有事件传入，runloop会运行直到循环中给定的日期，如果你给的是distantFuture，那么这个runloop会无限等待下去* kCFRunLoopAfterWaiting 从休眠中醒来，直接回到kCFRunLoopBeforeTimers状态* kCFRunLoopExit 退出循环
+这些状态也是一个枚举类型，系统是这么定义的，你可以使用observer来观测到这些状态：
+```Objective-C
+/* Run Loop Observer Activities */
+typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
+    kCFRunLoopEntry = (1UL << 0),
+    kCFRunLoopBeforeTimers = (1UL << 1),
+    kCFRunLoopBeforeSources = (1UL << 2),
+    kCFRunLoopBeforeWaiting = (1UL << 5),
+    kCFRunLoopAfterWaiting = (1UL << 6),
+    kCFRunLoopExit = (1UL << 7),
+    kCFRunLoopAllActivities = 0x0FFFFFFFU
+};```
+我们下面做一个测试，在demo中我们定义了一个新的线程类，这样我们可以自己启动和维护它的runloop对象。
+```Objective-C
+- (void)main
+{
+    @autoreleasepool {
+        NSLog(@"Thread Enter");
+        [[NSThread currentThread] setName:@"This is a test thread"];
+        NSRunLoop *currentThreadRunLoop = [NSRunLoop currentRunLoop];
+        // 或者
+        // CFRunLoopRef currentThreadRunLoop = CFRunLoopGetCurrent();
+        
+
+        CFRunLoopObserverContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
+        CFRunLoopObserverRef observer = CFRunLoopObserverCreate(kCFAllocatorDefault, kCFRunLoopAllActivities, YES, 0, &currentRunLoopObserver, &context);
+        
+        if (observer) {
+            CFRunLoopRef runLoopRef = currentThreadRunLoop.getCFRunLoop;
+            CFRunLoopAddObserver(runLoopRef, observer, kCFRunLoopDefaultMode);
+        }
+        
+        // 创建一个Timer，重复调用来驱动Run Loop
+        //[NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(handleTimerTask) userInfo:nil repeats:YES];
+        do {
+            [currentThreadRunLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:3]];
+        } while (1);
+    }
+}```
+输入源或者timer对于runloop来说是必要条件，如果没有添加任何输入源，则runloop根本不会启动，所以上面的代码中添加timer的操作，实际上是添加了一个默认的事件输入源，能让runloop保持运行。但是实际上，当你创建好一个runloop对象后，任何输入的事件都可以触发runloop的启动。
+例如下面的：
+```Objective-C
+[self performSelector:@selector(selectorTest) onThread:self.runLoopThread withObject:nil waitUntilDone:NO];```
+记住，如果你需要自己来启动和维护runloop的话，核心就在于一个do...while循环，你可以为runloop的跳出设置一个条件，也可以让runloop无限进行下去。在runloop没有接收到事件进入休眠状态之后，如果调用performSelector，runloop的状态变化如下：
+```
+2015-09-15 09:30:07.492 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopAfterWaiting
+2015-09-15 09:30:07.492 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 09:30:07.492 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 09:30:07.492 runloopTest[49521:1482478] fuck
+2015-09-15 09:30:07.493 runloopTest[49521:1482478] fuck_1
+2015-09-15 09:30:07.493 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopExit
+2015-09-15 09:30:07.493 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopEntry
+2015-09-15 09:30:07.493 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 09:30:07.494 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 09:30:07.494 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopExit
+2015-09-15 09:30:07.494 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopEntry
+2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeTimers
+2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeSources
+2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeWaiting```
+> 在这里我连续调用了两次performSelector，可以看到runloop也经历了两个循环，而如果只调用一次的话，不会有多出来的那次runloop（你可以自己尝试一下），这是否说明每一次performSelector执行完毕之后都会立即结束当前runloop开始新的，苹果的官方文档里有一句话：
+> > > > The run loop processes all queued perform selector calls each time through the loop, rather than processing one during each loop iteration
+> > 应该意思是并不是像上面看到的结果那样每一次循环执行一次。
+
