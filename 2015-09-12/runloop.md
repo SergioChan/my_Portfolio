@@ -191,4 +191,5 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 
 > * performSelector:onThread:withObject:waitUntilDone:> * performSelector:onThread:withObject:waitUntilDone:modes:
 > > Performs the specified selector on any thread for which you have an NSThread object. These methods give you the option of blocking the current thread until the selector is performed.
-也就是说，waitUntilDone意味着这个操作是否
+也就是说，waitUntilDone意味着这个操作是否会在当前线程阻塞其他的输入源，如果等于True，则每一次runloop循环只会处理这一个selector的调用，如果为False，则队列中后面等待着的selector调用都会在同一次runloop循环中执行。至于上文的执行了两个runloop循环的现象，我猜测应该是当runloop从休眠模式被唤醒的时候，当前循环执行完唤醒的操作后就会立即结束，释放掉之前可能累积下来的内存，然后开始新的循环，将队列中的其他输入逐个放进runloop循环中执行。
+
