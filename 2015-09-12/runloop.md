@@ -42,7 +42,7 @@ entries =>
 },}}
 ```
 
-可以看到一个runloop对象包含各种Mode——currentMode，common mode，modes等等，这里的示例我只指定了一个defaultMode。每个mode对应了source，observers和timers，底下的currently则显示的是当前状态的优先级，这个优先级实际上是一个带符号的整型数，后面的观察器部分我会提到。
+可以看到一个runloop对象包含各种Mode——currentMode，common mode，modes等等，这里的示例我只指定了一个defaultMode。每个mode对应了source，observers和timers。
 
 > 也许你会注意到 source 包括了source0和source1两个版本。
 > 
@@ -134,20 +134,20 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 [self performSelector:@selector(selectorTest) onThread:self.runLoopThread withObject:nil waitUntilDone:NO];```
 记住，如果你需要自己来启动和维护runloop的话，核心就在于一个do...while循环，你可以为runloop的跳出设置一个条件，也可以让runloop无限进行下去。在runloop没有接收到事件进入休眠状态之后，如果调用performSelector，runloop的状态变化如下：
 ```
-2015-09-15 09:30:07.492 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopAfterWaiting
-2015-09-15 09:30:07.492 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 09:30:07.492 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 09:30:07.492 runloopTest[49521:1482478] fuck
-2015-09-15 09:30:07.493 runloopTest[49521:1482478] fuck_1
-2015-09-15 09:30:07.493 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopExit
-2015-09-15 09:30:07.493 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopEntry
-2015-09-15 09:30:07.493 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 09:30:07.494 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 09:30:07.494 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopExit
-2015-09-15 09:30:07.494 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopEntry
-2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 09:30:07.495 runloopTest[49521:1482478] Current thread Run Loop activity: kCFRunLoopBeforeWaiting```
+Current thread Run Loop activity: kCFRunLoopAfterWaiting
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+fuck
+fuck_1
+Current thread Run Loop activity: kCFRunLoopExit
+Current thread Run Loop activity: kCFRunLoopEntry
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+Current thread Run Loop activity: kCFRunLoopExit
+Current thread Run Loop activity: kCFRunLoopEntry
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+Current thread Run Loop activity: kCFRunLoopBeforeWaiting```
 在这里我连续调用了两次performSelector，可以看到runloop也经历了两个循环，而如果只调用一次的话，不会有多出来的那次runloop（你可以自己尝试一下），这是否说明每一次performSelector执行完毕之后都会立即结束当前runloop开始新的，苹果的官方文档里有一句话：
 > The run loop processes all queued perform selector calls each time through the loop, rather than processing one during each loop iteration
 应该意思是并不是像上面看到的结果那样每一次循环执行一次，而是有一个待执行的操作队列。如果我同时执行四次performSelector，像这样：
@@ -160,31 +160,31 @@ typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
 实际上得到的结果和上面是一样的，然而当我将他们的waitUntilDone参数都设置为YES之后，我们可以看到不一样的地方：
 
 ```
-2015-09-15 21:30:02.144 runloopTest[89070:1961439] Thread Enter
-2015-09-15 21:30:03.463 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
-2015-09-15 21:30:03.463 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] fuck
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] fuck_1
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 21:30:03.464 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] fuck_2
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] fuck_2
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopExit
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopEntry
-2015-09-15 21:30:03.465 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeTimers
-2015-09-15 21:30:03.466 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeSources
-2015-09-15 21:30:03.466 runloopTest[89070:1961439] Current thread Run Loop activity: kCFRunLoopBeforeWaiting
+Thread Enter
+Current thread Run Loop activity: kCFRunLoopEntry
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+fuck
+Current thread Run Loop activity: kCFRunLoopExit
+Current thread Run Loop activity: kCFRunLoopEntry
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+fuck_1
+Current thread Run Loop activity: kCFRunLoopExit
+Current thread Run Loop activity: kCFRunLoopEntry
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+fuck_2
+Current thread Run Loop activity: kCFRunLoopExit
+Current thread Run Loop activity: kCFRunLoopEntry
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+fuck_2
+Current thread Run Loop activity: kCFRunLoopExit
+Current thread Run Loop activity: kCFRunLoopEntry
+Current thread Run Loop activity: kCFRunLoopBeforeTimers
+Current thread Run Loop activity: kCFRunLoopBeforeSources
+Current thread Run Loop activity: kCFRunLoopBeforeWaiting
 ```
 
 你可以看到每一个performSelector操作都单独执行了一个runloop，从苹果的文档中我们可以找到这个方法的定义：
